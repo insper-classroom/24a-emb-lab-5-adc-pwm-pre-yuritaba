@@ -23,17 +23,27 @@ void data_task(void *p) {
     }
 }
 
+#define WINDOW_SIZE 5 // Tamanho da janela para a média móvel
+
 void process_task(void *p) {
-    int data = 0;
+    int window[WINDOW_SIZE] = {0}; // Janela para armazenar as últimas 5 amostras
+    int sum = 0; // Soma das amostras na janela
+    int data = 0; // Dado atual recebido da fila
+    int index = 0; // Índice para inserir a próxima amostra na janela
 
     while (true) {
         if (xQueueReceive(xQueueData, &data, 100)) {
-            // implementar filtro aqui!
+            sum -= window[index]; // Subtrai o valor mais antigo da soma
+            window[index] = data; // Atualiza a janela com o novo valor
+            sum += data; // Adiciona o novo valor à soma
 
+            // Calcula a média móvel e imprime o resultado
+            int moving_average = sum / WINDOW_SIZE;
+            printf("%d\n", moving_average);
 
+            index = (index + 1) % WINDOW_SIZE; // Atualiza o índice para o próximo valor, rotacionando a janela
 
-
-            // deixar esse delay!
+            // Deixar esse delay!
             vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
